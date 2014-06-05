@@ -2,6 +2,9 @@
 
 
 // @TODO: Handle no defaultFields case and no records returned
+// @TODO: Current export record doesn't dehighlight until clicked on once
+// @TODO: Handle revert of related data
+
 
 angular.module('dfTable', ['dfUtility'])
     .constant('DF_TABLE_ASSET_PATH', 'admin_components/dreamfactory-components/dreamfactory-table/')
@@ -32,6 +35,7 @@ angular.module('dfTable', ['dfUtility'])
                     normalizeSchema: true,
                     autoClose: false,
                     params: {
+                        filter: null,
                         limit: 10,
                         offset: 0,
                         fields: '*',
@@ -43,8 +47,6 @@ angular.module('dfTable', ['dfUtility'])
                     extendFieldTypes: {},
                     exportValueOn: false
                 };
-
-                console.log(scope);
 
                 scope.options = dfObjectService.mergeObjects(scope.options, scope.defaults);
 
@@ -84,6 +86,8 @@ angular.module('dfTable', ['dfUtility'])
                 scope.count = 0;
 
                 scope._exportValue = null;
+
+                scope.newRecord = null;
 
 
                 // PUBLIC API
@@ -126,6 +130,11 @@ angular.module('dfTable', ['dfUtility'])
                 scope.editRecord = function (dataObj) {
 
                     scope._editRecord(dataObj);
+                };
+
+                scope.createRecord = function() {
+
+                    scope._createRecord();
                 };
 
                 scope.saveRecords = function () {
@@ -172,6 +181,11 @@ angular.module('dfTable', ['dfUtility'])
                     // Create Comple implementation
                     // right now we just call the private function
                     scope._setExportValue(dataObj);
+                };
+
+                scope.setExportValueToNull = function () {
+
+                    scope._setExportValueToNull();
                 };
 
 
@@ -281,12 +295,15 @@ angular.module('dfTable', ['dfUtility'])
 
                     var params = {};
 
+                    requestDataObj = requestDataObj || null;
+
                     if (requestDataObj) {
-                        params = dfObjectService.mergeObjects(requestDataObj.params, scope.options.params)
+                        params = dfObjectService.mergeObjects(requestDataObj.params, scope.options.params);
+
+                        console.log(params);
                     }else {
                         params = scope.options.params;
                     }
-
 
                     return $http({
                         method: 'GET',
@@ -535,11 +552,28 @@ angular.module('dfTable', ['dfUtility'])
                     scope.inProgress = stateBool;
                 };
 
+                scope._createNewRecordObj = function () {
+
+                    var newRecord = {};
+
+                    for (var _key in scope.schema) {
+                        newRecord[_key.name] = ''
+                    }
+
+                    return newRecord;
+                };
+
+
 
                 // View Control
                 scope._setCurrentEditRecord = function (dataObj) {
 
                     scope.currentEditRecord = dataObj;
+                };
+
+                scope._setNewRecordObj = function() {
+
+                    scope.newRecord = scope._createNewRecordObj();
                 };
 
                 scope._confirmAction = function (_message, _action) {
@@ -1217,6 +1251,16 @@ angular.module('dfTable', ['dfUtility'])
                     }
                 };
 
+                scope._createRecord = function() {
+
+                    scope._setNewRecordObj();
+                };
+
+                scope._setExportValueToNull = function () {
+
+                    scope.setExportValue(null)
+                };
+
 
                 // WATCHERS / INIT
 
@@ -1225,34 +1269,35 @@ angular.module('dfTable', ['dfUtility'])
                     if (!newValue) return false;
 
 
-                    if (scope.options.exportValueOn && !scope._exportValue) {
+                        if (scope.options.exportValueOn && !scope._exportValue && scope.parentRecord[scope.exportField.name]) {
 
-                        var requestDataObj = {
-                            params:{
-                                filter: scope.exportField.ref_fields + ' = "' + scope.parentRecord[scope.exportField.name] + '"'
-                            }
-                        };
+                            var requestDataObj = {};
 
+                            requestDataObj['params'] = {filter: scope.exportField.ref_fields + ' = ' + scope.parentRecord[scope.exportField.name]};
 
-                        scope._getRecordsFromServer(requestDataObj).then(
-                            function(result) {
+                            scope._getRecordsFromServer(requestDataObj).then(
+                                function(result) {
 
-                                var record = scope._getRecordsFromData(result)[0]
-                                scope._addStateProps(record);
-                                scope._exportValue = record;
+                                    var record = scope._getRecordsFromData(result)[0]
+                                    scope._addStateProps(record);
+                                    scope._exportValue = record;
 
-                            },
-                            function(reject) {
+                                    if (scope.options.params.filter) {
+                                        delete scope.options.params.filter;
+                                    }
 
-                                console.log(reject)
-                            }
-                        )
-                    }
+                                },
+                                function(reject) {
 
-
-                    if (scope.options.params.filter) {
-                        delete scope.options.params.filter;
-                    }
+                                    throw {
+                                        module: 'DreamFactory Table Module',
+                                        type: 'error',
+                                        provider: 'dreamfactory',
+                                        exception: reject
+                                    }
+                                }
+                            )
+                        }
 
 
 
@@ -1388,7 +1433,17 @@ angular.module('dfTable', ['dfUtility'])
 
                 var watchExportValue = scope.$watch('_exportValue', function (newValue, oldValue) {
 
-                    if (!newValue) return false;
+                    if (!newValue && !oldValue) return false;
+
+                    console.log(scope.exportField.name + ' ' + scope.parentRecord[scope.exportField.name] + ' = '
+                        + scope.exportField.ref_fields + ' ' + newValue[scope.exportField.ref_fields])
+
+                    if (scope.parentRecord[scope.exportField.name] === newValue[scope.exportField.ref_fields]) return false;
+
+                    if (!newValue) {
+                        scope._setExportState(oldValue, false);
+                        return false;
+                    }
 
                     // Set state props
                     if (oldValue) {
@@ -1396,9 +1451,19 @@ angular.module('dfTable', ['dfUtility'])
                     }
                     scope._setExportState(newValue, true);
 
+
                     // Assign proper value from obj to ref field on parent
                     scope.parentRecord[scope.exportField.name] = newValue[scope.exportField.ref_fields];
 
+                });
+
+                var watchNewRecord = scope.$watch('newRecord', function (newValue, oldValue) {
+
+                    if (newValue) {
+                        scope._setActiveView('new');
+                    } else {
+                        scope._setActiveView('table');
+                    }
                 });
 
                 // MESSAGES
@@ -1606,6 +1671,86 @@ angular.module('dfTable', ['dfUtility'])
 
 
     }])
+    .directive('createRecord', ['DF_TABLE_ASSET_PATH', '$http', function(DF_TABLE_ASSET_PATH, $http) {
+
+        return {
+            restrict: 'E',
+            scope: false,
+            templateUrl: DF_TABLE_ASSET_PATH + 'views/create-record.html',
+            link: function (scope, elem, attrs) {
+
+
+                // PUBLIC API
+                scope.closeCreateRecord = function () {
+                    scope._closeCreateRecord()
+                };
+
+                scope.saveNewRecord = function () {
+
+                    scope._saveNewRecord();
+                };
+
+
+                // PRIVATE API
+                scope._setCreateNewRecordNull = function () {
+
+                    scope.newRecord = null;
+                };
+
+                scope._saveNewRecordToServer = function () {
+
+                    return $http({
+                        method: 'POST',
+                        url: scope.options.url,
+                        data: scope.newRecord
+                    })
+                };
+
+
+                // COMPLEX IMPLEMENTATION
+                scope._closeCreateRecord = function() {
+
+                    scope._setCreateNewRecordNull();
+                };
+
+                scope._saveNewRecord = function () {
+
+                    scope._setInProgress(true);
+                    scope._saveNewRecordToServer().then(
+                        function(result) {
+
+                            console.log(result);
+                            scope._closeCreateRecord();
+                        },
+                        function(reject) {
+
+                            throw {
+                                module: 'DreamFactory Table Module',
+                                type: 'error',
+                                provider: 'dreamfactory',
+                                exception: reject
+                            }
+                        }
+                    ).finally(
+                        function () {
+                            scope._setInProgress(false);
+                        },
+                        function () {
+                            scope._setInProgress(false);
+                        }
+                    )
+                };
+
+
+
+                // MESSAGES
+
+
+
+
+            }
+        }
+    }])
     .directive('dreamfactoryBuildField', ['$templateCache', '$compile', 'dfObjectService', 'DSP_URL', function ($templateCache, $compile, dfObjectService, DSP_URL) {
 
         return {
@@ -1788,6 +1933,7 @@ angular.module('dfTable', ['dfUtility'])
                         table: scope._parseSystemTableName(scope.field.ref_table),
                         url: scope._buildURL(scope.service, scope._parseSystemTableName(scope.field.ref_table)),
                         params: {
+                            filter: null,
                             limit: 2,
                             offset: 0,
                             fields: '*',
