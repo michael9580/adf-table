@@ -1,0 +1,91 @@
+<div class="btn-toolbar">
+    <div class="btn-group">
+        <button type="button" class="btn btn-default btn-sm" data-ng-click="closeRecord()">Close</button>
+        <button type="button" class="btn btn-default btn-sm" data-ng-click="revertRecord()">Revert</button>
+        <button type="button" class="btn btn-default btn-sm" data-ng-click="deleteRecord()">Delete</button>
+        <button type="button" class="btn btn-default btn-sm" data-ng-click="saveRecord()">Save</button>
+    </div>
+
+    <div class="progress " data-ng-class="inProgress ? 'progress-striped active' : ''" style="width: 5%; height: 10px">
+        <div class="progress-bar" data-ng-class="inProgress ? 'progress-bar-info' : 'progress-bar-success'"
+             role="progressbar" aria-valuenow="100"
+             aria-valuemin="100" aria-valuemax="100" style="width: 100%"></div>
+    </div>
+</div>
+
+
+<form>
+    <div data-ng-repeat="field in schema.field track by $index">
+
+        <label>{{field.label}}</label>
+        <!-- <div dreamfactory-build-field data-type="{{field.type}}" data-name="{{field.name}}"></div> -->
+        <div data-ng-if="currentEditRecord" dreamfactory-build-field data-service="options.service" data-field="field"
+             data-extend-field-types="extendFieldTypes" data-related-data="relatedData"
+             data-current-edit-record="currentEditRecord"></div>
+
+
+        <!--
+
+            <div data-ng-if="prop.type === 'id'">
+                <input type="text" class="form-control" placeholder="Enter Value"
+                       data-ng-model="currentEditRecord[prop.name]" >
+            </div>
+
+            <div data-ng-if="prop.type === 'string' && prop.db_type !== 'text'">
+                <input type="text" class="form-control" placeholder="Enter Text Value"
+                       data-ng-model="currentEditRecord[prop.name]">
+            </div>
+
+            <div data-ng-if="prop.type === 'integer'">
+                <input type="number" class="form-control" placeholder="Enter Text Value"
+                       data-ng-model="currentEditRecord[prop.name]">
+            </div>
+
+            <div data-ng-if="prop.type === 'string' && prop.db_type === 'text'">
+                <textarea class="form-control" rows="5" data-ng-model="currentEditRecord[prop.name]"></textarea>
+            </div>
+
+            <div data-ng-if="prop.type === 'binary'">
+                <span>BINARY DATA</span>
+            </div>
+
+            <div data-ng-if="prop.type === 'float'">
+                <input type="number" class="form-control" placeholder="Enter Float Value"
+                       data-ng-model="currentEditRecord[prop.name]">
+            </div>
+
+            <div data-ng-if="prop.type === 'decimal'">
+                <input type="number" class="form-control" placeholder="Enter Decimal Value"
+                       data-ng-model="currentEditRecord[prop.name]">
+            </div>
+
+            <div data-ng-if="prop.type === 'datetime'">
+                <input type="datetime" class="form-control" placeholder="Enter DateTime"
+                       data-ng-model="currentEditRecord[prop.name]">
+            </div>
+
+            <div data-ng-if="prop.type === 'date'">
+                <input type="date" class="form-control" placeholder="Enter Date"
+                       data-ng-model="currentEditRecord[prop.name]">
+            </div>
+
+            <div data-ng-if="prop.type === 'time'">
+                <input type="time" class="form-control" placeholder="Enter Time"
+                       data-ng-model="currentEditRecord[prop.name]">
+            </div>
+
+            <div dreamfactory-build-field data-type="prop.type">
+
+            </div>
+
+            <div data-ng-if="prop.type === 'user_id'">
+                <span>USER_ID</span>
+            </div>
+
+
+        <div class="checkbox" data-ng-if="prop.type === 'boolean'">
+            <input type="checkbox" data-ng-model="currentEditRecord[prop.name]" data-ng-checked="currentEditRecord[prop.name]">
+        </div>
+-->
+    </div>
+</form>
