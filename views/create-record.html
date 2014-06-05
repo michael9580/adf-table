@@ -1,0 +1,23 @@
+<div class="btn-toolbar">
+    <div class="btn-group">
+        <button type="button" class="btn btn-default btn-sm" data-ng-click="closeCreateRecord()">Close</button>
+        <button type="button" class="btn btn-default btn-sm" data-ng-click="saveNewRecord()">Save</button>
+    </div>
+
+    <div class="progress " data-ng-class="inProgress ? 'progress-striped active' : ''" style="width: 5%; height: 10px">
+        <div class="progress-bar" data-ng-class="inProgress ? 'progress-bar-info' : 'progress-bar-success'"
+             role="progressbar" aria-valuenow="100"
+             aria-valuemin="100" aria-valuemax="100" style="width: 100%"></div>
+    </div>
+</div>
+
+
+<form>
+    <div data-ng-repeat="field in schema.field track by $index">
+
+        <label>{{field.label}}</label>
+        <div data-ng-if="newRecord" dreamfactory-build-field data-service="options.service" data-field="field"
+             data-extend-field-types="extendFieldTypes" data-related-data="relatedData"
+             data-current-edit-record="newRecord"></div>
+    </div>
+</form>
