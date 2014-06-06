@@ -129,9 +129,9 @@
 
                     <div class="btn-toolbar">
                         <div class="btn-group">
-                            <button type="button" data-ng-click="editRecord(_exportValue)"><i class="fa fa-pencil"></i>
+                            <button type="button" class="btn btn-default btn-small" data-ng-click="editRecord(_exportValue)" data-ng-disabled="!_exportValue"><i class="fa fa-pencil"></i>
                             </button>
-                            <button type="button" data-ng-click="setExportValue()"><i class="fa fa-frown-o"></i>
+                            <button type="button" class="btn btn-default btn-small" data-ng-click="setExportValue()"><i class="fa fa-frown-o"></i>
                             </button>
                         </div>
                     </div>
@@ -151,7 +151,6 @@
                 </div>
             </div>
 
-            <!-- Dealing with no records -->
             <div data-ng-if="record" class="table-responsive">
                 <table class="table table-hover" >
                     <tr>
@@ -167,13 +166,15 @@
 
                     <tr data-ng-repeat="obj in record | dfFilterBy:{'field':filter.prop, 'value':filter.value, 'on':tableFilterOn} | orderObjectBy:order.orderBy:order.orderByReverse">
                         <td style="width: 100px;">
-                            <button type="button" data-ng-click="editRecord(obj)" class="btn btn-default btn-sm">
-                                <i class="fa fa-fw fa-pencil"></i>
-                            </button>
-                            <button type="button" data-ng-if="options.exportValueOn" class="btn btn-default btn-sm"
-                                    data-ng-click="setExportValue(obj)">
-                                <i class="fa fa-fw fa-flash"></i>
-                            </button>
+                            <div class="btn-group">
+                                <button type="button" data-ng-click="editRecord(obj)" class="btn btn-default btn-sm">
+                                    <i class="fa fa-fw fa-pencil"></i>
+                                </button>
+                                <button type="button" data-ng-if="options.exportValueOn" class="btn btn-default btn-sm"
+                                        data-ng-click="setExportValue(obj)">
+                                    <i class="fa fa-fw fa-flash"></i>
+                                </button>
+                            </div>
                         </td>
                         <td data-ng-repeat="value in obj | orderAndShowValue : tableFields track by $index"
                             data-ng-click="toggleSelected(obj)"
@@ -184,8 +185,7 @@
                 </table>
             </div>
 
-            <!-- Dealing with no records -->
-            <p data-ng-if="!record">No records found.</p>
+            <p data-ng-if="record.length === 0">No records found.</p>
         </div>
 
         <div data-ng-show="activeView === 'edit'">

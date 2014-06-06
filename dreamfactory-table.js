@@ -1,7 +1,6 @@
 'use strict';
 
 
-// @TODO: Handle no records returned
 // @TODO: Handle revert of related data
 
 
@@ -132,7 +131,7 @@ angular.module('dfTable', ['dfUtility'])
                     scope._editRecord(dataObj);
                 };
 
-                scope.createRecord = function() {
+                scope.createRecord = function () {
 
                     scope._createRecord();
                 };
@@ -294,7 +293,7 @@ angular.module('dfTable', ['dfUtility'])
 
                     if (requestDataObj) {
                         params = dfObjectService.mergeObjects(requestDataObj.params, scope.options.params);
-                    }else {
+                    } else {
                         params = scope.options.params;
                     }
 
@@ -557,14 +556,13 @@ angular.module('dfTable', ['dfUtility'])
                 };
 
 
-
                 // View Control
                 scope._setCurrentEditRecord = function (dataObj) {
 
                     scope.currentEditRecord = dataObj;
                 };
 
-                scope._setNewRecordObj = function() {
+                scope._setNewRecordObj = function () {
 
                     scope.newRecord = scope._createNewRecordObj();
                 };
@@ -605,7 +603,7 @@ angular.module('dfTable', ['dfUtility'])
                 scope._createFieldsObj = function (schemaDataObj) {
 
                     angular.forEach(schemaDataObj, function (value, index) {
-                        if(!scope.defaultFieldsShown) {
+                        if (!scope.defaultFieldsShown) {
 
                             scope.tableFields[value.name] = {active: true, name: value.name, label: value.label};
                             return;
@@ -635,7 +633,6 @@ angular.module('dfTable', ['dfUtility'])
                     });
                 };
 
-                // @TODO
                 scope._init = function (newValue) {
 
                     if (scope._prepareRecords(newValue)) {
@@ -659,7 +656,6 @@ angular.module('dfTable', ['dfUtility'])
 
                 };
 
-                // @TODO
                 scope._prepareRecords = function (data) {
 
                     scope.record = scope._getRecordsFromData(data);
@@ -673,7 +669,7 @@ angular.module('dfTable', ['dfUtility'])
                         scope._addStateProps(_obj);
 
                         if (scope.options.exportValueOn && scope._exportValue) {
-                            if(scope._checkExportValue(_obj)) {
+                            if (scope._checkExportValue(_obj)) {
                                 scope._setExportState(_obj, true);
                             }
                         }
@@ -686,13 +682,11 @@ angular.module('dfTable', ['dfUtility'])
 
                 };
 
-                scope._checkExportValue = function(dataObj) {
+                scope._checkExportValue = function (dataObj) {
 
                     return dataObj[scope.exportField.ref_fields] === scope._exportValue[scope.exportField.ref_fields];
                 };
 
-
-                // @TODO
                 scope._prepareSchema = function (data) {
 
                     scope.schema = scope._getSchemaFromData(data);
@@ -795,7 +789,14 @@ angular.module('dfTable', ['dfUtility'])
 
                 scope._calcPagination = function (newValue) {
 
-                    scope._createPagesArr(scope._calcTotalPages(scope._getCountFromMeta(newValue), scope._getOptionFromParams('limit')));
+                    var count = scope._getCountFromMeta(newValue);
+
+                    if (count == 0) {
+                        scope.pagesArr.push(scope._createPageObj(0));
+                        return false;
+                    }
+
+                    scope._createPagesArr(scope._calcTotalPages(count, scope._getOptionFromParams('limit')));
                 };
 
 
@@ -1260,7 +1261,7 @@ angular.module('dfTable', ['dfUtility'])
                     }
                 };
 
-                scope._createRecord = function() {
+                scope._createRecord = function () {
 
                     scope._setNewRecordObj();
                 };
@@ -1277,36 +1278,35 @@ angular.module('dfTable', ['dfUtility'])
 
                     if (!newValue) return false;
 
-                        if (scope.options.exportValueOn && !scope._exportValue && scope.parentRecord[scope.exportField.name]) {
+                    if (scope.options.exportValueOn && !scope._exportValue && scope.parentRecord[scope.exportField.name]) {
 
-                            var requestDataObj = {};
+                        var requestDataObj = {};
 
-                            requestDataObj['params'] = {filter: scope.exportField.ref_fields + ' = ' + scope.parentRecord[scope.exportField.name]};
+                        requestDataObj['params'] = {filter: scope.exportField.ref_fields + ' = ' + scope.parentRecord[scope.exportField.name]};
 
-                            scope._getRecordsFromServer(requestDataObj).then(
-                                function(result) {
+                        scope._getRecordsFromServer(requestDataObj).then(
+                            function (result) {
 
-                                    var record = scope._getRecordsFromData(result)[0];
-                                    scope._addStateProps(record);
-                                    scope._exportValue = record;
+                                var record = scope._getRecordsFromData(result)[0];
+                                scope._addStateProps(record);
+                                scope._exportValue = record;
 
-                                    if (scope.options.params.filter) {
-                                        delete scope.options.params.filter;
-                                    }
-
-                                },
-                                function(reject) {
-
-                                    throw {
-                                        module: 'DreamFactory Table Module',
-                                        type: 'error',
-                                        provider: 'dreamfactory',
-                                        exception: reject
-                                    }
+                                if (scope.options.params.filter) {
+                                    delete scope.options.params.filter;
                                 }
-                            )
-                        }
 
+                            },
+                            function (reject) {
+
+                                throw {
+                                    module: 'DreamFactory Table Module',
+                                    type: 'error',
+                                    provider: 'dreamfactory',
+                                    exception: reject
+                                }
+                            }
+                        )
+                    }
 
 
                     if (!newValue.data) {
@@ -1336,7 +1336,6 @@ angular.module('dfTable', ['dfUtility'])
                         scope._resetFilter(scope.schema);
                         scope._resetOrder(scope.schema);
                     }
-
 
 
                 });
@@ -1470,7 +1469,7 @@ angular.module('dfTable', ['dfUtility'])
                     // Probably can find a better way
                     var found = false,
                         i = 0;
-                    while( !found && i < scope.record.length ) {
+                    while (!found && i < scope.record.length) {
 
                         var record = scope.record[i];
                         if (record[scope.exportField.name] === scope._exportValue[scope.exportField.name]) {
@@ -1498,6 +1497,7 @@ angular.module('dfTable', ['dfUtility'])
                         scope._setActiveView('table');
                     }
                 });
+
 
                 // MESSAGES
 
@@ -1704,7 +1704,7 @@ angular.module('dfTable', ['dfUtility'])
 
 
     }])
-    .directive('createRecord', ['DF_TABLE_ASSET_PATH', '$http', function(DF_TABLE_ASSET_PATH, $http) {
+    .directive('createRecord', ['DF_TABLE_ASSET_PATH', '$http', function (DF_TABLE_ASSET_PATH, $http) {
 
         return {
             restrict: 'E',
@@ -1741,7 +1741,7 @@ angular.module('dfTable', ['dfUtility'])
 
 
                 // COMPLEX IMPLEMENTATION
-                scope._closeCreateRecord = function() {
+                scope._closeCreateRecord = function () {
 
                     scope._setCreateNewRecordNull();
                 };
@@ -1750,12 +1750,12 @@ angular.module('dfTable', ['dfUtility'])
 
                     scope._setInProgress(true);
                     scope._saveNewRecordToServer().then(
-                        function(result) {
+                        function (result) {
 
                             console.log(result);
                             scope._closeCreateRecord();
                         },
-                        function(reject) {
+                        function (reject) {
 
                             throw {
                                 module: 'DreamFactory Table Module',
@@ -1775,10 +1775,7 @@ angular.module('dfTable', ['dfUtility'])
                 };
 
 
-
                 // MESSAGES
-
-
 
 
             }
