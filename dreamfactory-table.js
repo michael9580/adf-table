@@ -1,8 +1,7 @@
 'use strict';
 
 
-// @TODO: Handle no defaultFields case and no records returned
-// @TODO: Current export record doesn't dehighlight until clicked on once
+// @TODO: Handle no records returned
 // @TODO: Handle revert of related data
 
 
@@ -55,6 +54,7 @@ angular.module('dfTable', ['dfUtility'])
                 scope.relatedData = {};
 
                 scope.tableFields = {};
+                scope.tableFilterOn = true;
                 scope.defaultFieldsShown = {};
 
                 scope.filter = {
@@ -178,14 +178,7 @@ angular.module('dfTable', ['dfUtility'])
 
                 scope.setExportValue = function (dataObj) {
 
-                    // Create Comple implementation
-                    // right now we just call the private function
                     scope._setExportValue(dataObj);
-                };
-
-                scope.setExportValueToNull = function () {
-
-                    scope._setExportValueToNull();
                 };
 
 
@@ -248,8 +241,10 @@ angular.module('dfTable', ['dfUtility'])
 
                 scope._setExportState = function (dataObj, stateBool) {
 
-                    dataObj.__dfUI.export = stateBool;
-                }
+                    if (dataObj) {
+                        dataObj.__dfUI.export = stateBool;
+                    }
+                };
 
                 scope._isUnsaved = function (dataObj) {
 
@@ -299,8 +294,6 @@ angular.module('dfTable', ['dfUtility'])
 
                     if (requestDataObj) {
                         params = dfObjectService.mergeObjects(requestDataObj.params, scope.options.params);
-
-                        console.log(params);
                     }else {
                         params = scope.options.params;
                     }
@@ -612,6 +605,12 @@ angular.module('dfTable', ['dfUtility'])
                 scope._createFieldsObj = function (schemaDataObj) {
 
                     angular.forEach(schemaDataObj, function (value, index) {
+                        if(!scope.defaultFieldsShown) {
+
+                            scope.tableFields[value.name] = {active: true, name: value.name, label: value.label};
+                            return;
+                        }
+
                         if (scope.defaultFieldsShown.hasOwnProperty(value.name)) {
                             switch (scope.defaultFieldsShown[value.name]) {
 
@@ -636,11 +635,13 @@ angular.module('dfTable', ['dfUtility'])
                     });
                 };
 
+                // @TODO
                 scope._init = function (newValue) {
 
-                    scope._prepareRecords(newValue);
+                    if (scope._prepareRecords(newValue)) {
+                        scope._prepareRelatedData(newValue);
+                    }
 
-                    scope._prepareRelatedData(newValue);
 
                     scope._prepareSchema(newValue);
 
@@ -658,9 +659,12 @@ angular.module('dfTable', ['dfUtility'])
 
                 };
 
+                // @TODO
                 scope._prepareRecords = function (data) {
 
                     scope.record = scope._getRecordsFromData(data);
+
+                    if (!scope.record) return false;
 
                     scope._removePrivateFields(scope._getDefaultFields(scope.options));
 
@@ -687,11 +691,13 @@ angular.module('dfTable', ['dfUtility'])
                     return dataObj[scope.exportField.ref_fields] === scope._exportValue[scope.exportField.ref_fields];
                 };
 
+
+                // @TODO
                 scope._prepareSchema = function (data) {
 
                     scope.schema = scope._getSchemaFromData(data);
 
-                    if (data.normalizeSchema) {
+                    if (data.normalizeSchema && (scope.record.length > 0)) {
                         scope.schema = scope._normalizeSchema(scope.schema, scope.record);
                     }
                 };
@@ -725,9 +731,9 @@ angular.module('dfTable', ['dfUtility'])
                     scope.activeView = viewStr;
                 };
 
-                scope._setExportValue = function (dataObj) {
+                scope._setExportValueToParent = function (dataObj) {
 
-                    scope._exportValue = dataObj;
+                    scope._exportValue = dataObj || null;
                 };
 
 
@@ -796,6 +802,8 @@ angular.module('dfTable', ['dfUtility'])
                 // Filtering
                 scope._resetFilter = function (schemaDataObj) {
 
+                    if (!schemaDataObj) return false;
+
                     scope.filter = {
                         viewBy: schemaDataObj.field[0].name || '',
                         prop: schemaDataObj.field[0].name || '',
@@ -842,6 +850,8 @@ angular.module('dfTable', ['dfUtility'])
 
                 // Ordering
                 scope._resetOrder = function (schemaDataObj) {
+
+                    if (!schemaDataObj) return false;
 
                     scope.order = {
                         orderBy: schemaDataObj.field[0].name || '',
@@ -910,7 +920,6 @@ angular.module('dfTable', ['dfUtility'])
                     // Delete schema fields that don't represent values in the model
                     for (var _key in schemaDataObj.field) {
                         if (recordsDataArr[0].hasOwnProperty(schemaDataObj.field[_key].name)) {
-
 
                             normalizedSchema.push(schemaDataObj.field[_key]);
                         }
@@ -1256,9 +1265,9 @@ angular.module('dfTable', ['dfUtility'])
                     scope._setNewRecordObj();
                 };
 
-                scope._setExportValueToNull = function () {
+                scope._setExportValue = function (dataObj) {
 
-                    scope.setExportValue(null)
+                    scope._setExportValueToParent(dataObj);
                 };
 
 
@@ -1267,7 +1276,6 @@ angular.module('dfTable', ['dfUtility'])
                 var watchOptions = scope.$watch('options', function (newValue, oldValue) {
 
                     if (!newValue) return false;
-
 
                         if (scope.options.exportValueOn && !scope._exportValue && scope.parentRecord[scope.exportField.name]) {
 
@@ -1278,7 +1286,7 @@ angular.module('dfTable', ['dfUtility'])
                             scope._getRecordsFromServer(requestDataObj).then(
                                 function(result) {
 
-                                    var record = scope._getRecordsFromData(result)[0]
+                                    var record = scope._getRecordsFromData(result)[0];
                                     scope._addStateProps(record);
                                     scope._exportValue = record;
 
@@ -1433,28 +1441,53 @@ angular.module('dfTable', ['dfUtility'])
 
                 var watchExportValue = scope.$watch('_exportValue', function (newValue, oldValue) {
 
+
+                    //We had Null and we passed in Null
+                    // This is mostly for init
                     if (!newValue && !oldValue) return false;
 
-                    console.log(scope.exportField.name + ' ' + scope.parentRecord[scope.exportField.name] + ' = '
-                        + scope.exportField.ref_fields + ' ' + newValue[scope.exportField.ref_fields])
 
-                    if (scope.parentRecord[scope.exportField.name] === newValue[scope.exportField.ref_fields]) return false;
+                    // Null and an oldValue?
+                    if (!newValue && oldValue) {
 
-                    if (!newValue) {
+                        // Set the state of the outgoing value
                         scope._setExportState(oldValue, false);
+
+                        // set parent to newValue(which will be null)
+                        scope.parentRecord[scope.exportField.name] = newValue;
+
                         return false;
                     }
 
-                    // Set state props
-                    if (oldValue) {
-                        scope._setExportState(oldValue, false);
+                    // If we clicked on the same record or passed in the same record some how
+                    // this will short circuit.  No need to go any further
+                    if (scope.parentRecord[scope.exportField.name] === newValue[scope.exportField.ref_fields]) return false;
+
+
+                    // Ugh.....
+                    // This is the only way to loop through and
+                    // affect the first default value that is set
+                    // Probably can find a better way
+                    var found = false,
+                        i = 0;
+                    while( !found && i < scope.record.length ) {
+
+                        var record = scope.record[i];
+                        if (record[scope.exportField.name] === scope._exportValue[scope.exportField.name]) {
+
+                            scope._setExportState(scope.record[i], false);
+                            found = true;
+                        }
+                        i++
                     }
-                    scope._setExportState(newValue, true);
 
 
                     // Assign proper value from obj to ref field on parent
                     scope.parentRecord[scope.exportField.name] = newValue[scope.exportField.ref_fields];
 
+                    // Set the state of incoming and outgoing objects
+                    scope._setExportState(oldValue, false);
+                    scope._setExportState(newValue, true);
                 });
 
                 var watchNewRecord = scope.$watch('newRecord', function (newValue, oldValue) {

@@ -126,10 +126,13 @@
             <div data-ng-if="options.exportValueOn && parentRecord" class="row">
                 <div class="col-xs-12">
                     <label>Export Value</label>
+
                     <div class="btn-toolbar">
                         <div class="btn-group">
-                            <button type="button" data-ng-click="editRecord(_exportValue)"><i class="fa fa-pencil"></i></button>
-                            <button type="button" data-ng-click="setToNull(_exportValue)"><i class="fa fa-frown-o"></i></button>
+                            <button type="button" data-ng-click="editRecord(_exportValue)"><i class="fa fa-pencil"></i>
+                            </button>
+                            <button type="button" data-ng-click="setExportValue()"><i class="fa fa-frown-o"></i>
+                            </button>
                         </div>
                     </div>
 
@@ -148,27 +151,41 @@
                 </div>
             </div>
 
-            <table class="table">
-                <tr>
-                    <th></th>
-                    <th class="df-th-cell" data-ng-class="order.orderBy === field.name ? 'df-th-selected' : ''"
-                        data-ng-click="orderOnSelect(field)"
-                        data-ng-repeat="field in schema.field | orderAndShowSchema: tableFields ">
-                        <span class="df-th-text">{{field.label}}</span>
-                        <i data-ng-if="order.orderBy === field.name" class="fa"
-                           data-ng-class="order.orderBy === field.name && order.orderByReverse ? 'fa-arrow-down' : 'fa-arrow-up'"></i>
-                    </th>
-                </tr>
+            <!-- Dealing with no records -->
+            <div data-ng-if="record" class="table-responsive">
+                <table class="table table-hover" >
+                    <tr>
+                        <th></th>
+                        <th class="df-th-cell" data-ng-class="order.orderBy === field.name ? 'df-th-selected' : ''"
+                            data-ng-click="orderOnSelect(field)"
+                            data-ng-repeat="field in schema.field | orderAndShowSchema: tableFields ">
+                            <span class="df-th-text">{{field.label}}</span>
+                            <i data-ng-if="order.orderBy === field.name" class="fa"
+                               data-ng-class="order.orderBy === field.name && order.orderByReverse ? 'fa-arrow-down' : 'fa-arrow-up'"></i>
+                        </th>
+                    </tr>
 
-                <tr data-ng-repeat="obj in record | dfFilterBy:{'field':filter.prop, 'value':filter.value} | orderObjectBy:order.orderBy:order.orderByReverse">
-                    <td><i data-ng-click="editRecord(obj)" class="fa fa-pencil"></i><i data-ng-if="options.exportValueOn" data-ng-click="setExportValue(obj)" class="fa fa-flash"></i></td>
-                    <td data-ng-repeat="value in obj | orderAndShowValue : tableFields track by $index"
-                        data-ng-click="toggleSelected(obj)"
-                        data-ng-class="obj.__dfUI.selected ? 'dfUISelected' : '' || obj.__dfUI.unsaved ? 'dfUIUnsaved' : '' || obj.__dfUI.export ? 'dfUIExport' : ''">
-                        {{value}}
-                    </td>
-                </tr>
-            </table>
+                    <tr data-ng-repeat="obj in record | dfFilterBy:{'field':filter.prop, 'value':filter.value, 'on':tableFilterOn} | orderObjectBy:order.orderBy:order.orderByReverse">
+                        <td style="width: 100px;">
+                            <button type="button" data-ng-click="editRecord(obj)" class="btn btn-default btn-sm">
+                                <i class="fa fa-fw fa-pencil"></i>
+                            </button>
+                            <button type="button" data-ng-if="options.exportValueOn" class="btn btn-default btn-sm"
+                                    data-ng-click="setExportValue(obj)">
+                                <i class="fa fa-fw fa-flash"></i>
+                            </button>
+                        </td>
+                        <td data-ng-repeat="value in obj | orderAndShowValue : tableFields track by $index"
+                            data-ng-click="toggleSelected(obj)"
+                            data-ng-class="obj.__dfUI.selected ? 'dfUISelected' : '' || obj.__dfUI.unsaved ? 'dfUIUnsaved' : '' || obj.__dfUI.export ? 'dfUIExport' : ''">
+                            {{value}}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Dealing with no records -->
+            <p data-ng-if="!record">No records found.</p>
         </div>
 
         <div data-ng-show="activeView === 'edit'">
