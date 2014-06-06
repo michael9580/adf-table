@@ -1,7 +1,7 @@
 'use strict';
 
 
-// @TODO: Handle revert of related data
+// @TODO: UI Bugs on revert data
 
 
 angular.module('dfTable', ['dfUtility'])
@@ -391,6 +391,10 @@ angular.module('dfTable', ['dfUtility'])
 
                     dataObj['__dfData'] = {};
                     dataObj.__dfData['revert'] = temp;
+
+                    if (!dataObj.__dfData.revert.hasOwnProperty('_exportValue')) {
+                        dataObj.__dfData.revert['_exportValue'] = {};
+                    }
                 };
 
                 scope._getRevertCopy = function (dataObj) {
@@ -1291,6 +1295,7 @@ angular.module('dfTable', ['dfUtility'])
                                 scope._addStateProps(record);
                                 scope._exportValue = record;
 
+
                                 if (scope.options.params.filter) {
                                     delete scope.options.params.filter;
                                 }
@@ -1413,6 +1418,8 @@ angular.module('dfTable', ['dfUtility'])
 
                         if (!scope._hasRevertCopy(newValue)) {
                             scope._createRevertCopy(newValue);
+
+
                         }
                         scope._setActiveView('edit');
                     } else {
@@ -1422,6 +1429,7 @@ angular.module('dfTable', ['dfUtility'])
                 });
 
                 var watchCurrentEditRecordState = scope.$watchCollection('currentEditRecord', function (newValue, oldValue) {
+
 
                     if (newValue) {
                         if (scope._compareObjects(newValue, newValue.__dfData.revert)) {
@@ -1435,6 +1443,61 @@ angular.module('dfTable', ['dfUtility'])
                 var watchParentRecord = scope.$watchCollection('parentRecord', function (newValue, oldValue) {
 
                     if (!newValue) return false;
+
+                    if (!newValue && !scope._exportValue) return false;
+
+                    if ((!scope._exportValue && newValue[scope.exportField.name]) == null) {
+
+                        return false;
+                    }
+
+                    if (!newValue[scope.exportField.name]) {
+                        scope._exportValue = null;
+                        return false;
+                    }
+
+                    // Some external force(revert!) has set the parent value to something else.  Go get that record
+                        if ((!scope._exportValue && newValue[scope.exportField.name]) || ((scope._exportValue[scope.exportField.ref_fields] !== newValue[scope.exportField.name]) && (newValue[scope.exportField.name] !== null))) {
+
+                            var requestDataObj = {};
+
+                            requestDataObj['params'] = {filter: scope.exportField.ref_fields + ' = ' + newValue[scope.exportField.name], offset: 0};
+
+                            scope._getRecordsFromServer(requestDataObj).then(
+                                function (result) {
+
+                                    var record = scope._getRecordsFromData(result);
+
+                                    if (!record) throw {
+                                        module: 'DreamFactory Table Module',
+                                        type: 'error',
+                                        provider: 'dreamfactory',
+                                        exception: 'Revert related data record not found.'
+                                    };
+
+                                    scope._addStateProps(record[0]);
+                                    scope._exportValue = record[0];
+
+
+                                    if (scope.options.params.filter) {
+                                        delete scope.options.params.filter;
+                                    }
+                                },
+                                function (reject) {
+
+                                    throw {
+                                        module: 'DreamFactory Table Module',
+                                        type: 'error',
+                                        provider: 'dreamfactory',
+                                        exception: reject
+                                    }
+                                }
+                            );
+
+                            return false;
+
+                        }
+
 
                 });
 
@@ -1461,7 +1524,6 @@ angular.module('dfTable', ['dfUtility'])
                     // If we clicked on the same record or passed in the same record some how
                     // this will short circuit.  No need to go any further
                     if (scope.parentRecord[scope.exportField.name] === newValue[scope.exportField.ref_fields]) return false;
-
 
                     // Ugh.....
                     // This is the only way to loop through and
@@ -1547,6 +1609,7 @@ angular.module('dfTable', ['dfUtility'])
 
                     var recordCopy = scope._getRevertCopy(scope.currentEditRecord);
                     for (var _key in recordCopy) {
+
                         if (scope.currentEditRecord.hasOwnProperty(_key)) {
                             scope.currentEditRecord[_key] = recordCopy[_key];
                         }
