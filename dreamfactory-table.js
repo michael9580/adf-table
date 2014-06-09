@@ -28,6 +28,9 @@ angular.module('dfTable', ['dfUtility'])
             templateUrl: DF_TABLE_ASSET_PATH + 'views/dreamfactory-table.html',
             link: function (scope, elem, attrs) {
 
+
+                scope.services = ['db', 'system'];
+
                 scope.defaults = {
                     normalizeData: false,
                     normalizeSchema: true,
@@ -247,7 +250,6 @@ angular.module('dfTable', ['dfUtility'])
 
                 scope._isUnsaved = function (dataObj) {
 
-                    console.log(dataObj);
                     return dataObj.__dfUI.unsaved;
                 };
 
@@ -556,6 +558,8 @@ angular.module('dfTable', ['dfUtility'])
                     for (var _key in scope.schema) {
                         newRecord[_key.name] = ''
                     }
+
+                    scope._addStateProps(newRecord);
 
                     return newRecord;
                 };
@@ -1284,6 +1288,11 @@ angular.module('dfTable', ['dfUtility'])
 
                     if (!newValue) return false;
 
+                    if (!newValue.service) return false;
+
+
+                    scope.options = dfObjectService.mergeObjects(scope.options, scope.defaults);
+
                     if (scope.options.exportValueOn && !scope._exportValue && scope.parentRecord[scope.exportField.name]) {
 
                         var requestDataObj = {};
@@ -1305,8 +1314,6 @@ angular.module('dfTable', ['dfUtility'])
                                 if (!newValue.data) {
                                     scope._getRecordsFromServer().then(
                                         function (_result) {
-
-                                            console.log(_result);
 
                                             newValue['data'] = _result;
                                             scope._init(newValue);
@@ -1447,8 +1454,6 @@ angular.module('dfTable', ['dfUtility'])
 
                         if (!scope._hasRevertCopy(newValue)) {
                             scope._createRevertCopy(newValue);
-
-
                         }
                         scope._setActiveView('edit');
                     } else {
