@@ -247,6 +247,7 @@ angular.module('dfTable', ['dfUtility'])
 
                 scope._isUnsaved = function (dataObj) {
 
+                    console.log(dataObj);
                     return dataObj.__dfUI.unsaved;
                 };
 
@@ -643,7 +644,6 @@ angular.module('dfTable', ['dfUtility'])
                         scope._prepareRelatedData(newValue);
                     }
 
-
                     scope._prepareSchema(newValue);
 
                     scope._prepareExtendedFieldTypes(newValue);
@@ -1000,7 +1000,9 @@ angular.module('dfTable', ['dfUtility'])
 
                     angular.forEach(scope.record, function (_obj, _index) {
                         if (scope._isUnsaved(_obj)) {
-                            scope.record[_index] = scope._getRevertCopy(_obj);
+                            if (scope._hasRevertCopy(scope.record[_index])) {
+                                scope.record[_index] = scope._getRevertCopy(_obj);
+                            }
                         }
                     })
                 };
@@ -1295,10 +1297,40 @@ angular.module('dfTable', ['dfUtility'])
                                 scope._addStateProps(record);
                                 scope._exportValue = record;
 
-
                                 if (scope.options.params.filter) {
                                     delete scope.options.params.filter;
                                 }
+
+                                // call back nightmare.  But it keeps pagination straight
+                                if (!newValue.data) {
+                                    scope._getRecordsFromServer().then(
+                                        function (_result) {
+
+                                            console.log(_result);
+
+                                            newValue['data'] = _result;
+                                            scope._init(newValue);
+                                            scope._resetFilter(scope.schema);
+                                            scope._resetOrder(scope.schema);
+
+                                        },
+                                        function (_reject) {
+                                            throw {
+                                                module: 'DreamFactory Table Module',
+                                                type: 'error',
+                                                provider: 'dreamfactory',
+                                                exception: _reject
+                                            }
+                                        }
+                                    )
+                                }
+                                else {
+
+                                    scope._init(newValue);
+                                    scope._resetFilter(scope.schema);
+                                    scope._resetOrder(scope.schema);
+                                }
+
 
                             },
                             function (reject) {
@@ -1311,38 +1343,35 @@ angular.module('dfTable', ['dfUtility'])
                                 }
                             }
                         )
-                    }
+                    } else {
 
+                        if (!newValue.data) {
+                            scope._getRecordsFromServer().then(
+                                function (_result) {
 
-                    if (!newValue.data) {
+                                    newValue['data'] = _result;
+                                    scope._init(newValue);
+                                    scope._resetFilter(scope.schema);
+                                    scope._resetOrder(scope.schema);
 
-                        scope._getRecordsFromServer().then(
-                            function (_result) {
-
-                                newValue['data'] = _result;
-                                scope._init(newValue);
-                                scope._resetFilter(scope.schema);
-                                scope._resetOrder(scope.schema);
-
-                            },
-                            function (_reject) {
-                                throw {
-                                    module: 'DreamFactory Table Module',
-                                    type: 'error',
-                                    provider: 'dreamfactory',
-                                    exception: _reject
+                                },
+                                function (_reject) {
+                                    throw {
+                                        module: 'DreamFactory Table Module',
+                                        type: 'error',
+                                        provider: 'dreamfactory',
+                                        exception: _reject
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
+                        else {
+
+                            scope._init(newValue);
+                            scope._resetFilter(scope.schema);
+                            scope._resetOrder(scope.schema);
+                        }
                     }
-                    else {
-
-                        scope._init(newValue);
-                        scope._resetFilter(scope.schema);
-                        scope._resetOrder(scope.schema);
-                    }
-
-
                 });
 
                 var watchCurrentPage = scope.$watch('currentPage', function (newValue, oldValue) {
@@ -1430,12 +1459,14 @@ angular.module('dfTable', ['dfUtility'])
 
                 var watchCurrentEditRecordState = scope.$watchCollection('currentEditRecord', function (newValue, oldValue) {
 
-
                     if (newValue) {
-                        if (scope._compareObjects(newValue, newValue.__dfData.revert)) {
-                            scope._setUnsavedState(newValue, true);
-                        } else {
-                            scope._setUnsavedState(newValue, false);
+
+                        if (scope._hasRevertCopy(newValue)) {
+                            if (scope._compareObjects(newValue, newValue.__dfData.revert)) {
+                                scope._setUnsavedState(newValue, true);
+                            } else {
+                                scope._setUnsavedState(newValue, false);
+                            }
                         }
                     }
                 });
@@ -1447,7 +1478,6 @@ angular.module('dfTable', ['dfUtility'])
                     if (!newValue && !scope._exportValue) return false;
 
                     if ((!scope._exportValue && newValue[scope.exportField.name]) == null) {
-
                         return false;
                     }
 
@@ -1457,48 +1487,46 @@ angular.module('dfTable', ['dfUtility'])
                     }
 
                     // Some external force(revert!) has set the parent value to something else.  Go get that record
-                        if ((!scope._exportValue && newValue[scope.exportField.name]) || ((scope._exportValue[scope.exportField.ref_fields] !== newValue[scope.exportField.name]) && (newValue[scope.exportField.name] !== null))) {
+                    if ((!scope._exportValue && newValue[scope.exportField.name]) || ((scope._exportValue[scope.exportField.ref_fields] !== newValue[scope.exportField.name]))) {
 
-                            var requestDataObj = {};
+                        var requestDataObj = {};
 
-                            requestDataObj['params'] = {filter: scope.exportField.ref_fields + ' = ' + newValue[scope.exportField.name], offset: 0};
+                        requestDataObj['params'] = {filter: scope.exportField.ref_fields + ' = ' + newValue[scope.exportField.name], offset: 0};
 
-                            scope._getRecordsFromServer(requestDataObj).then(
-                                function (result) {
+                        scope._getRecordsFromServer(requestDataObj).then(
+                            function (result) {
 
-                                    var record = scope._getRecordsFromData(result);
+                                var record = scope._getRecordsFromData(result);
 
-                                    if (!record) throw {
-                                        module: 'DreamFactory Table Module',
-                                        type: 'error',
-                                        provider: 'dreamfactory',
-                                        exception: 'Revert related data record not found.'
-                                    };
+                                if (!record) throw {
+                                    module: 'DreamFactory Table Module',
+                                    type: 'error',
+                                    provider: 'dreamfactory',
+                                    exception: 'Revert related data record not found.'
+                                };
 
-                                    scope._addStateProps(record[0]);
-                                    scope._exportValue = record[0];
+                                scope._addStateProps(record[0]);
+                                scope._exportValue = record[0];
 
 
-                                    if (scope.options.params.filter) {
-                                        delete scope.options.params.filter;
-                                    }
-                                },
-                                function (reject) {
-
-                                    throw {
-                                        module: 'DreamFactory Table Module',
-                                        type: 'error',
-                                        provider: 'dreamfactory',
-                                        exception: reject
-                                    }
+                                if (scope.options.params.filter) {
+                                    delete scope.options.params.filter;
                                 }
-                            );
+                            },
+                            function (reject) {
 
-                            return false;
+                                throw {
+                                    module: 'DreamFactory Table Module',
+                                    type: 'error',
+                                    provider: 'dreamfactory',
+                                    exception: reject
+                                }
+                            }
+                        );
 
-                        }
+                        return false;
 
-
+                    }
                 });
 
                 var watchExportValue = scope.$watch('_exportValue', function (newValue, oldValue) {
@@ -1506,14 +1534,35 @@ angular.module('dfTable', ['dfUtility'])
 
                     //We had Null and we passed in Null
                     // This is mostly for init
-                    if (!newValue && !oldValue) return false;
+                    if (!newValue && !oldValue) {
+
+                        return false;
+                    }
 
 
                     // Null and an oldValue?
                     if (!newValue && oldValue) {
 
-                        // Set the state of the outgoing value
                         scope._setExportState(oldValue, false);
+
+                        // Ugh.....
+                        // This is the only way to loop through and
+                        // affect the first default value that is set
+                        // Probably can find a better way
+                        var found = false,
+                            i = 0;
+                        if (scope.record) {
+                            while (!found && i < scope.record.length) {
+
+                                var record = scope.record[i];
+                                if (record[scope.exportField.name] === null) {
+
+                                    scope._setExportState(scope.record[i], false);
+                                    found = true;
+                                }
+                                i++
+                            }
+                        }
 
                         // set parent to newValue(which will be null)
                         scope.parentRecord[scope.exportField.name] = newValue;
@@ -1521,9 +1570,61 @@ angular.module('dfTable', ['dfUtility'])
                         return false;
                     }
 
+                    if (!oldValue && newValue) {
+
+
+                        // Ugh.....
+                        // This is the only way to loop through and
+                        // affect the first default value that is set
+                        // Probably can find a better way
+                        var found = false,
+                            i = 0;
+                        if (scope.record) {
+                            while (!found && i < scope.record.length) {
+
+                                var record = scope.record[i];
+                                if (record[scope.exportField.name] === scope._exportValue[scope.exportField.name]) {
+
+                                    scope._setExportState(scope.record[i], true);
+                                    found = true;
+                                }
+                                i++
+                            }
+                        }
+                    }
+
+                    if (oldValue && newValue) {
+
+                        scope._setExportState(oldValue, false);
+
+                        // Ugh.....
+                        // This is the only way to loop through and
+                        // affect the first default value that is set
+                        // Probably can find a better way
+                        var found = false,
+                            i = 0;
+                        if (scope.record) {
+                            while (!found && i < scope.record.length) {
+
+                                var record = scope.record[i];
+                                if (record[scope.exportField.name] === scope._exportValue[scope.exportField.name]) {
+
+                                    scope._setExportState(scope.record[i], true);
+                                    found = true;
+                                }
+                                i++
+                            }
+                        }
+                    }
                     // If we clicked on the same record or passed in the same record some how
                     // this will short circuit.  No need to go any further
-                    if (scope.parentRecord[scope.exportField.name] === newValue[scope.exportField.ref_fields]) return false;
+                    if (scope.parentRecord[scope.exportField.name] === newValue[scope.exportField.ref_fields]) {
+
+
+                        if (newValue) scope._setExportState(newValue, true);
+                        if (oldValue) scope._setExportState(oldValue, false);
+                        return false;
+                    }
 
                     // Ugh.....
                     // This is the only way to loop through and
@@ -1541,7 +1642,6 @@ angular.module('dfTable', ['dfUtility'])
                         }
                         i++
                     }
-
 
                     // Assign proper value from obj to ref field on parent
                     scope.parentRecord[scope.exportField.name] = newValue[scope.exportField.ref_fields];
@@ -1733,6 +1833,7 @@ angular.module('dfTable', ['dfUtility'])
 
                             scope._removeRevertCopy(scope.currentEditRecord);
                             scope._setUnsavedState(scope.currentEditRecord, false);
+
 
                             if (scope.options.autoClose) {
                                 scope._closeEdit();
@@ -2041,7 +2142,6 @@ angular.module('dfTable', ['dfUtility'])
                 }
 
                 elem.append($compile($templateCache.get(scope.templateData.template))(scope));
-
             }
         }
     }]);

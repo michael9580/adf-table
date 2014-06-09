@@ -125,18 +125,21 @@
 
             <div data-ng-if="options.exportValueOn && parentRecord" class="row">
                 <div class="col-xs-12">
-                    <label>Export Value</label>
+                    <div class="forn-group" data-ng-class="_isUnsaved(parentRecord) == true ? 'has-warning': ''">
+                        <label>Export Value</label>
 
-                    <div class="btn-toolbar">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-default btn-small" data-ng-click="editRecord(_exportValue)" data-ng-disabled="!_exportValue"><i class="fa fa-pencil"></i>
-                            </button>
-                            <button type="button" class="btn btn-default btn-small" data-ng-click="setExportValue()"><i class="fa fa-frown-o"></i>
-                            </button>
+                        <div class="btn-toolbar">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-small" data-ng-click="editRecord(_exportValue)" data-ng-disabled="!_exportValue"><i class="fa fa-pencil"></i>
+                                </button>
+                                <button type="button" class="btn btn-default btn-small" data-ng-click="setExportValue()"><i class="fa fa-frown-o"></i>
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <input data-ng-model="_exportValue[exportField.ref_fields]" class="form-control" disabled>
+
+                        <input data-ng-model="_exportValue[exportField.ref_fields]" class="form-control">
+                    </div>
                 </div>
             </div>
 
