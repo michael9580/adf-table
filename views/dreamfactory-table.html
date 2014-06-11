@@ -3,6 +3,43 @@
 </div>
 <div data-ng-show="options.service">
 
+
+<div data-ng-if="options.exportValueOn && parentRecord">
+    <div class="row">
+        <div>
+            <!-- _isUnsaved(parentRecord) == true -->
+            <!--  data-ng-class="parentRecord[exportField.name] !== _exportValue[exportField.ref_fields] ? 'has-warning': ''" -->
+            <div class="form-group">
+                <label>
+                    <small>Export Value</small>
+                </label>
+
+                <div class="input-group">
+                              <span class="input-group-btn">
+                                 <button type="button" class="btn btn-default btn-small"
+                                         data-ng-click="editExportRecord(_exportValue)" data-ng-disabled="!_exportValue"><i
+                                         class="fa fa-pencil"></i>
+                                 </button>
+                                <button type="button" class="btn btn-default btn-small" data-ng-click="setExportValue()"><i
+                                        class="fa fa-times"></i>
+                                </button>
+                              </span>
+                    <input data-ng-model="_exportValue[exportField.ref_fields]" class="form-control col-xs-12">
+                     <span class="input-group-btn">
+                                 <button type="button" class="btn btn-default btn-small"
+                                         data-ng-click="toggleExpandEditor()">Expand&nbsp;
+                                     <i data-ng-if="!relatedExpand" class="fa fa-caret-down"></i>
+                                     <i data-ng-if="relatedExpand" class="fa fa-caret-up"></i>
+
+                                 </button>
+                              </span>
+                </div><!-- /input-group -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div data-ng-hide="options.exportValueOn && parentRecord && !relatedExpand">
 <ul class="nav nav-tabs">
     <li data-ng-class="activeTab === (schema.name + '-table') ? 'active' : '' "><a
             data-ng-click="setTab(schema.name +'-table')">{{schema.plural}}</a></li>
@@ -18,7 +55,7 @@
     <div data-ng-show="activeView === 'table'">
         <div class="row">
             <div class="col-xs-12">
-                <div class="btn-toolbar" style="margin: 20px auto">
+                <div class="btn-toolbar df-toolbar">
                     <div class="btn-group">
                         <button type="button" data-ng-click="refreshResults()" class="btn btn-default btn-sm">
                             Refresh Results
@@ -61,8 +98,6 @@
         </div>
 
         <div class="row">
-
-
                 <!--
                 <div data-ng-hide="filterViewBy === '' ? true : false"
                      class="form-group col-xs-12 col-sm-4">
@@ -108,7 +143,7 @@
         </div>
 
         <div class="row">
-            <hr />
+            <hr class="df-table-divider" />
         </div>
 
         <div class="row">
@@ -130,9 +165,10 @@
         </div>
 
         <div class="row">
-            <hr />
+            <hr class="df-table-divider" />
         </div>
 
+<!--
 
         <div class="row">
             <div data-ng-if="options.exportValueOn && parentRecord" class="row">
@@ -154,16 +190,17 @@
                                 </button>
                               </span>
                             <input data-ng-model="_exportValue[exportField.ref_fields]" class="form-control col-xs-12">
-                        </div><!-- /input-group -->
+                        </div>&lt;!&ndash; /input-group &ndash;&gt;
                     </div>
                 </div>
             </div>
         </div>
 
+
         <div data-ng-if="options.exportValueOn && parentRecord" class="row">
             <hr />
         </div>
-
+-->
 
         <div class="row">
             <div class="col-xs-12">
@@ -243,5 +280,6 @@
                     <p style="display:inline; margin-left: 10px;">{{field.label}}</p>
                 </span>
     </div>
+</div>
 </div>
 </div>
