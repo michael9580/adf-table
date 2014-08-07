@@ -279,6 +279,7 @@ $scope.options = {
         defaultFields: {
 
             // setting a field to true shows it
+            id: true,
             first_name: true,
             last_name: true,
             email: true,
