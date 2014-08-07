@@ -174,6 +174,7 @@ $scope.options = {
         defaultFields: {
 
             // setting a field to true shows it
+            id: true,
             first_name: true,
             last_name: true,
             email: true,
@@ -239,7 +240,7 @@ $scope.options = {
             }
         ]
     };
-
+```
 
 ###Super User
 Let's do a bit more with overrideFields.  Perhaps we have a field called 'contact' and it's type is 'int'. That int is
@@ -370,3 +371,4 @@ $scope.options = {
             }
         ]
     };
+```
