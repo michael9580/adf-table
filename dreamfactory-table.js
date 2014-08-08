@@ -3227,7 +3227,92 @@ angular.module('dfTable', [])
                 }
             }
         }
-    }]);
+    }])
+    .service('dfObjectService', [
+        function () {
+
+            return {
+
+                mergeObjects: function (obj1, obj2) {
+
+                    for (var key in obj1) {
+                        obj2[key] = obj1[key]
+                    }
+
+                    return obj2;
+                },
+
+                deepMergeObjects: function (obj1, obj2) {
+
+                    var self = this;
+
+                    for (var _key in obj1) {
+                        if (obj2.hasOwnProperty(_key)) {
+
+                            switch (Object.prototype.toString.call(obj2[_key])) {
+
+                                case '[object Object]':
+                                    obj2[_key] = self.deepMergeObjects(obj1[_key], obj2[_key]);
+                                    break;
+
+                                case '[object Array]':
+                                    obj2[_key] = obj1[_key];
+                                    //obj2[_key].concat(obj1[_key]);
+                                    break;
+
+                                default:
+                                    obj2[_key] = obj1[_key];
+                            }
+
+                            /*    if(Object.prototype.toString.call(obj2[_key]) === '[object Object]') {
+
+                             obj2[_key] = self.deepMergeObjects(obj1[_key], obj2[_key]);
+                             }else {
+                             obj2[_key] = obj1[_key];
+                             }*/
+                        }
+                    }
+
+                    return obj2;
+                }
+            }
+
+        }
+    ])
+    .service('dfStringService', [function () {
+
+        return {
+            areIdentical: function (stringA, stringB) {
+
+                stringA = stringA || '';
+                stringB = stringB || '';
+
+                function _sameLength(stringA, stringB) {
+                    return stringA.length == stringB.length;
+                }
+
+                function _sameLetters(stringA, stringB) {
+
+                    var l = Math.min(stringA.length, stringB.length);
+
+                    for (var i = 0; i < l; i++) {
+                        if (stringA.charAt(i) !== stringB.charAt(i)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+
+                if (_sameLength(stringA, stringB) && _sameLetters(stringA, stringB)) {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+    }
+    ]);
 
 
 
