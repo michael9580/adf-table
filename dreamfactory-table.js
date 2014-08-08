@@ -3311,8 +3311,198 @@ angular.module('dfTable', [])
             }
         }
 
+    }])
+    .filter('orderAndShowSchema', [function () {
+
+        return function (items, fields, reverse) {
+
+            var filtered = [];
+
+            angular.forEach(
+                fields, function (field) {
+
+                    angular.forEach(
+                        items, function (item) {
+                            if (item.name === field.name && field.active == true) {
+
+                                filtered.push(item);
+                            }
+                        }
+                    );
+                }
+            );
+
+            if (reverse) {
+                filtered.reverse();
+            }
+            return filtered;
+        }
     }
     ])
+    .filter('orderAndShowValue', [function () {
+
+        return function (items, fields, reverse) {
+
+            // Angular sometimes throws a duplicate key error.
+            // I'm not sure why.  We were just pushing values onto
+            // an array.  So I use a counter to increment the key
+            // of our data object that we assign our filtered values
+            // to.  Now they are extracted into the table in the correct
+            // order.
+
+            var filtered = [];
+
+            // for each field
+            angular.forEach(
+                fields, function (field) {
+
+                    // search the items for that field
+                    for (var _key in items) {
+
+                        // if we find it
+                        if (_key === field.name && field.active == true) {
+
+                            // push on to
+                            filtered.push(items[_key]);
+                        }
+                    }
+                }
+            );
+
+            if (reverse) {
+                filtered.reverse();
+            }
+            return filtered;
+        }
+    }
+    ])
+    .filter('orderObjectBy', [function () {
+        return function (items, field, reverse) {
+
+            var filtered = [];
+
+            function cmp(a, b) {
+                return a == b ? 0 : a < b ? -1 : 1;
+            }
+
+            angular.forEach(
+                items, function (item) {
+                    filtered.push(item);
+                }
+            );
+
+            if (filtered.length === 0) {
+                return filtered;
+            }
+
+            switch (typeof filtered[0][field]) {
+
+                case 'number':
+                    filtered.sort(
+                        function numberCmp(a, b) {
+                            return cmp(Number(a[field]), Number(b[field]));
+                        }
+                    )
+                    break;
+
+                case 'string':
+
+                    filtered.sort(
+                        function sortfn(a, b) {
+                            var upA = a[field].toUpperCase();
+                            var upB = b[field].toUpperCase();
+                            return (
+                                upA < upB
+                                ) ? -1 : (
+                                upA > upB
+                                ) ? 1 : 0;
+                        }
+                    );
+                    break;
+
+                default:
+                    filtered.sort(
+                        function sortfn(a, b) {
+                            var upA = a[field]
+                            var upB = b[field]
+                            return (
+                                upA < upB
+                                ) ? -1 : (
+                                upA > upB
+                                ) ? 1 : 0;
+                        }
+                    );
+            }
+
+            if (reverse) {
+                filtered.reverse();
+            }
+            return filtered;
+        };
+    }
+    ])
+    .filter('dfFilterBy', [function () {
+        return function (items, options) {
+
+            if (!options.on) {
+                return items;
+            }
+
+            var filtered = [];
+
+            // There is nothing to base a filter off of
+            if (!options) {
+                return items
+            }
+            ;
+
+            if (!options.field) {
+                return items
+            }
+            ;
+            if (!options.value) {
+                return items
+            }
+            ;
+            if (!options.regex) {
+                options.regex = new RegExp(options.value, "i");
+            }
+
+            angular.forEach(
+                items, function (item) {
+                    if (options.regex.test(item[options.field])) {
+
+                        filtered.push(item)
+                    }
+                }
+            );
+
+            return filtered;
+        }
+    }
+    ])
+    .filter('dfOrderExplicit', [function () {
+
+        return function (items, order) {
+
+            var filtered = [], i = 0;
+
+            angular.forEach(
+                items, function (value, index) {
+
+                    if (value.name === order[i]) {
+                        filtered.push(value)
+
+                    }
+                    i++;
+                }
+            )
+
+            return filtered;
+
+        }
+    }
+    ]);
 
 
 
