@@ -7,7 +7,7 @@ I'm going to give the basics.  I'm still working...in Beta.  Things may change w
 
 
 
-bower install adf-table or clone and link the js and css yourself.  It has to exist in 'bower_components/adf-table'.
+bower install dreamfactory-table or clone and link the js and css yourself.  It has to exist in 'bower_components/adf-table'.
 
 
 
