@@ -31,7 +31,7 @@
 
 
 angular.module('dfTable', [])
-    .constant('DF_TABLE_ASSET_PATH', 'bower_components/adf-table/')
+    .constant('DF_TABLE_ASSET_PATH', 'bower_components/dreamfactory-table/')
     .run(['$templateCache', function ($templateCache) {
 
         $templateCache.put('df-input-text.html', '<input type="{{templateData.type}}"  class="form-control" placeholder="{{templateData.placeholder}}" data-ng-model="currentEditRecord[field.name]" data-ng-disabled="!templateData.editable" data-ng-required="field.required">');
@@ -3311,8 +3311,7 @@ angular.module('dfTable', [])
             }
         }
 
-    }
-    ]);
+    }]);
 
 
 

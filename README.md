@@ -3,7 +3,8 @@ adf-table
 
 AngularJS DreamFactory table component
 
-I'm going to give the basics.  I'm still working...in Beta.  Things may change without warning.
+I'm going to give the basics.  I'm still working...in Beta.  Things may change without warning.  I also wrote this small
+how-to in 30 mins so I might have not been 100% accurate.  Use at your own risk.
 
 
 
