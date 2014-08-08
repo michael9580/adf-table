@@ -1,0 +1,22 @@
+{
+  "name": "dreamfactory-table",
+  "version": "0.7.0",
+  "homepage": "https://github.com/michael9580/adf-table",
+  "authors": [
+    "Michael Mandato <michaelmandato@dreamfactory.com>"
+  ],
+  "description": "Table component for use with Dreamfactory DSP",
+  "keywords": [
+    "DreamFactory",
+    "DSP",
+    "AngularJS"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
