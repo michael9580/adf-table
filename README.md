@@ -8,7 +8,7 @@ how-to in 30 mins so I might have not been 100% accurate.  Use at your own risk.
 
 
 
-bower install dreamfactory-table or clone and link the js and css yourself.  It has to exist in 'bower_components/adf-table'.
+bower install dreamfactory-table or clone and link the js and css yourself.  It has to exist in 'bower_components/dreamfactory-table'.
 
 
 
@@ -53,7 +53,7 @@ $scope.options = {
         // we need these inside dfTable
         service: YOUR_DATA_SERVICE_HERE,
         table: YOUR_TABLE_HERE,
-        url: DSP_URL + '/rest/' + this.service + '/' + this.table,
+        url: DSP_URL + '/rest/' + YOUR_DATA_SERVICE_HERE + '/' + YOUR_TABLE_HERE,
     };
 ```
 
@@ -84,7 +84,7 @@ $scope.options = {
         // we need these inside dfTable
         service: 'db',
         table: 'accounts',
-        url: DSP_URL + '/rest/' + this.service + '/' + this.table,
+        url: DSP_URL + '/rest/db/accounts',
 
         // we added a default fields object to our options object
         // each property of the default fields object the name of a table field
@@ -119,7 +119,7 @@ $scope.options = {
         // we need these inside dfTable
         service: 'db',
         table: 'accounts',
-        url: DSP_URL + '/rest/' + this.service + '/' + this.table,
+        url: DSP_URL + '/rest/db/accounts',
 
         // we added a default fields object to our options object
         // each property of the default fields object the name of a table field
@@ -176,7 +176,7 @@ $scope.options = {
         // we need these inside dfTable
         service: 'db',
         table: 'accounts',
-        url: DSP_URL + '/rest/' + this.service + '/' + this.table,
+        url: DSP_URL + '/rest/db/accounts',
 
         // we added a default fields object to our options object
         // each property of the default fields object the name of a table field
@@ -281,7 +281,7 @@ $scope.options = {
         // we need these inside dfTable
         service: 'db',
         table: 'accounts',
-        url: DSP_URL + '/rest/' + this.service + '/' + this.table,
+        url: DSP_URL + '/rest/db/accounts',
 
         // we added a default fields object to our options object
         // each property of the default fields object the name of a table field
@@ -352,6 +352,7 @@ $scope.options = {
                 field: 'id',
 
                 // and we set editable to false making it...
+                // not editable
                 editable: false,
             },
 
