@@ -3323,9 +3323,7 @@ angular.module('dfTable', [])
                 return false;
             }
         }
-
-    }
-    ])
+    }])
     .filter('orderAndShowSchema', [function () {
 
         return function (items, fields, reverse) {
