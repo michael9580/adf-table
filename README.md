@@ -24,6 +24,15 @@ angular.module('YOUR_MAIN_APP_MODULE', ['dfTable'])
 // We'll use it through out the app.
 .constant('DSP_URL', YOUR_DSP_URL)
 
+// You'll also need to set your app key
+// I set it like so.
+.constant('DSP_API_KEY', YOUR_APP_NAME)
+.config(['$httpProvider', 'DSP_API_KEY', function ($httpProvider, DSP_API_KEY) {
+
+        // Set default headers for http requests
+        $httpProvider.defaults.headers.common["X-DreamFactory-Application-Name"] = DSP_API_KEY;
+
+    }])
 
 
 // continue with app definition

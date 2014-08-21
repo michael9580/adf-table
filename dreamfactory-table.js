@@ -36,6 +36,7 @@ angular.module('dfTable', [])
 
         $templateCache.put('df-input-text.html', '<input type="{{templateData.type}}"  class="form-control" placeholder="{{templateData.placeholder}}" data-ng-model="currentEditRecord[field.name]" data-ng-disabled="!templateData.editable" data-ng-required="field.required">');
         $templateCache.put('df-input-ref-text.html', '<input type="{{templateData.type}}"  class="form-control" placeholder="{{templateData.placeholder}}" data-ng-model="currentEditRecord[field.name]" data-ng-disabled="!templateData.editable" data-ng-required="field.required">');
+        $templateCache.put('df-input-textarea.html', '<textarea class="form-control" data-ng-model="currentEditRecord[field.name]"></textarea>');
         $templateCache.put('df-input-binary.html', '<p>BINARY DATA</p>');
         $templateCache.put('df-input-datetime.html', '<p>DATETIME</p>');
         $templateCache.put('df-input-reference.html', '<div class="well"><df-table data-options="relatedOptions" data-parent-record="currentEditRecord" data-export-field="field"></df-table></div>');
@@ -45,38 +46,38 @@ angular.module('dfTable', [])
         $templateCache.put('df-input-values-picklist.html',
             '<div class="row">' +
                 '<div class="col-xs-12 col-md-6">' +
-                    '<div class="form-group">' +
-                        '<div class="input-group">' +
-                            '<input type="text" class="form-control" data-ng-model="currentEditRecord[field.name]" placeholder="Enter Value or Choose from list" data-ng-required="field.required">' +
-                            '<div class="input-group-btn">' +
-                                '<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">List <span class="caret"></span></button>' +
-                                '<ul class="dropdown-menu pull-right df-dropdown-height">' +
-                                    '<li data-ng-click="assignValue(item)" data-ng-repeat="item in data"><a>{{item}}</a></li>' +
-                                '</ul>' +
-                            '</div><!-- /btn-group -->' +
-                        '</div><!-- /input-group -->' +
-                    '</div><!-- /.col-lg-6 -->' +
+                '<div class="form-group">' +
+                '<div class="input-group">' +
+                '<input type="text" class="form-control" data-ng-model="currentEditRecord[field.name]" placeholder="Enter Value or Choose from list" data-ng-required="field.required">' +
+                '<div class="input-group-btn">' +
+                '<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">List <span class="caret"></span></button>' +
+                '<ul class="dropdown-menu pull-right df-dropdown-height">' +
+                '<li data-ng-click="assignValue(item)" data-ng-repeat="item in data"><a>{{item}}</a></li>' +
+                '</ul>' +
+                '</div><!-- /btn-group -->' +
+                '</div><!-- /input-group -->' +
+                '</div><!-- /.col-lg-6 -->' +
                 '</div>' +
-            '</div>'
+                '</div>'
         );
         $templateCache.put('df-input-values-only-picklist.html',
             '<div class="form-group">' +
                 '<select class="form-control col-xs-12 col-md-6" data-ng-model="currentEditRecord[field.name]" data-ng-options="item for item in data" data-ng-required="field.required"></select>' +
-            '</div>'
+                '</div>'
         );
         $templateCache.put('df-input-date-time-picker.html',
             '<div class="form-group col-xs-12">\n' +
                 ' <div class="input-group col-sm-6 col-md-4">\n' +
-                    '<span class="input-group-btn">\n' +
-                        '<button type="button" data-ng-disabled="!templateData.editable" class="btn btn-default btn-small" data-ng-click="open($event)"><i class="fa fa-calendar fa-fw"></i></button>' +
-                        '<button type="button" class="btn btn-default" data-ng-disabled="!templateData.editable" data-ng-click="setNow()">Now</button>\n'+
-                    '</span>\n' +
-                    '<input type="text" class="form-control" data-ng-disabled="!templateData.editable" data-datepicker-popup="{{format}}" data-ng-model="dt" data-is-open="opened"  data-date-disabled="disabled(date, mode)" data-ng-required="field.required" data-close-text="Close" />' +
+                '<span class="input-group-btn">\n' +
+                '<button type="button" data-ng-disabled="!templateData.editable" class="btn btn-default btn-small" data-ng-click="open($event)"><i class="fa fa-calendar fa-fw"></i></button>' +
+                '<button type="button" class="btn btn-default" data-ng-disabled="!templateData.editable" data-ng-click="setNow()">Now</button>\n'+
+                '</span>\n' +
+                '<input type="text" class="form-control" data-ng-disabled="!templateData.editable" data-datepicker-popup="{{format}}" data-ng-model="dt" data-is-open="opened"  data-date-disabled="disabled(date, mode)" data-ng-required="field.required" data-close-text="Close" />' +
                 '</div>\n'+
                 '<div class="col-sm-6 col-md-2">\n' +
-                    '<timepicker style="display: inline-block" data-ng-model="mytime" data-ng-change="changed()" show-meridian="ismeridian"></timepicker>\n' +
+                '<timepicker style="display: inline-block" data-ng-model="mytime" data-ng-change="changed()" show-meridian="ismeridian"></timepicker>\n' +
                 '</div>\n' +
-            '</div>');
+                '</div>');
     }])
     .directive('dfTable', ['DF_TABLE_ASSET_PATH', '$http', '$q', '$filter', '$compile', 'dfObjectService', 'dfTableEventService', 'dfTableCallbacksService', function (DF_TABLE_ASSET_PATH, $http, $q, $filter, $compile, dfObjectService, dfTableEventService, dfTableCallbacksService) {
 
@@ -255,10 +256,10 @@ angular.module('dfTable', [])
                     scope._confirmAction('You are about to mass delete records.  Continue?', scope._deleteRecords);
 
                     /*if (scope._checkForUnsavedRecords(scope.record)) {
-                        scope._confirmAction('You have Unsaved records.  Continue without saving?', scope._deleteRecords)
-                    } else {
-                        scope._deleteRecords();
-                    }*/
+                     scope._confirmAction('You have Unsaved records.  Continue without saving?', scope._deleteRecords)
+                     } else {
+                     scope._deleteRecords();
+                     }*/
                 };
 
                 scope.applyFilter = function () {
@@ -562,7 +563,7 @@ angular.module('dfTable', [])
 
                 scope._buildField = function (fieldNameStr) {
 
-                    console.log(fieldNameStr);
+                    // console.log(fieldNameStr);
                 };
 
                 scope._createRevertCopy = function (dataObj) {
@@ -787,12 +788,15 @@ angular.module('dfTable', [])
 
                     if (scope.excludedFields.length == 0) return false;
 
+                    scope.filteredSchema = [];
+
                     angular.forEach(scope.schema.field, function (_obj) {
 
                         if (scope.excludedFields.hasOwnProperty(_obj.name) && scope.excludedFields[_obj.name].fields[formNameStr]) {
 
-                            //console.log('Schema property \'' + _obj.name + '\' excluded from ' + form + ' form')
+                            // console.log('Schema property \'' + _obj.name + '\' excluded from ' + formNameStr + ' form')
                         }else {
+
                             scope.filteredSchema.push(_obj);
                         }
                     });
@@ -802,28 +806,33 @@ angular.module('dfTable', [])
 
                     if (scope.options.groupFields.length == 0) return false;
 
-                    var _schema = scope.filteredSchema.length > 0 ? scope.filteredSchema : scope.schema.field;
+                    var _schema = [];
+                    scope.groupedSchema = [];
+
+                    _schema = scope.filteredSchema.length > 0 ? scope.filteredSchema : scope.schema.field;
+
 
                     angular.forEach(scope.options.groupFields, function (fobj) {
 
+                        var counter = 0;
                         var group = {};
                         group['name'] = fobj.name;
                         group['fields'] = [];
                         group['dividers'] = fobj.dividers;
 
-                        angular.forEach(_schema, function(item) {
-                            angular.forEach(fobj.fields, function (field, index) {
+                        angular.forEach(fobj.fields, function(field) {
+                            angular.forEach(_schema, function (item) {
+
                                 if (item.name === field) {
 
-                                    //console.log(group.name + ' => ' + item.name + ' = ' + field);
-                                    group.fields[index] = item;
+                                    // console.log(group.name + ' => ' + item.name + ' = ' + field);
+                                    group.fields[counter] = item;
+                                    counter++
                                 }
                             });
                         });
 
                         scope.groupedSchema.push(group);
-
-
                     });
                 };
 
@@ -1169,7 +1178,12 @@ angular.module('dfTable', [])
                         scope.overrideFields[_obj.field] = {};
 
                         if (_obj.hasOwnProperty('record')) {
-                            scope.overrideFields[_obj.field]['records'] = scope._getRecordsFromData(_obj.record);
+                            if (_obj.record instanceof Array) {
+                                scope.overrideFields[_obj.field]['records'] = _obj.record;
+                            }
+                            else {
+                                scope.overrideFields[_obj.field]['records'] = scope._getRecordsFromData(_obj.record);
+                            }
                         }
 
                         scope.overrideFields[_obj.field]['display'] = _obj.display;
@@ -2610,13 +2624,13 @@ angular.module('dfTable', [])
 
                 scope._saveNewRecordToServer = function () {
 
-                   return $http({
+                    return $http({
                         method: 'POST',
                         url: scope.options.url,
                         data: scope.newRecord,
-                       params: {
-                           fields: '*'
-                       }
+                        params: {
+                            fields: '*'
+                        }
                     })
                 };
 
@@ -2629,7 +2643,7 @@ angular.module('dfTable', [])
 
                 scope._saveNewRecord = function () {
 
-                   scope._setInProgress(true);
+                    scope._setInProgress(true);
                     dfTableCallbacksService.run('onCreate', 'pre', scope.newRecord);
                     scope._saveNewRecordToServer().then(
                         function (result) {
@@ -2697,7 +2711,6 @@ angular.module('dfTable', [])
                 activeView: '=?'
             },
             link: function (scope, elem, attrs) {
-
 
 
                 scope._parseEditable = function (fieldObj) {
@@ -2822,7 +2835,7 @@ angular.module('dfTable', [])
                     scope.templateData = {
                         prop: scope.field.name,
                         template: '',
-                        placeholder: scope.overrideFields[scope.field.name].display.type || '',
+                        placeholder: scope.overrideFields[scope.field.name].display.placeholder || '',
                         type: scope.overrideFields[scope.field.name].display.type || 'text',
                         editable: scope.overrideFields[scope.field.name].editable,
                         field: scope.field || '',
@@ -2846,7 +2859,7 @@ angular.module('dfTable', [])
                             break;
 
                         case 'textarea':
-                            scope.templateData.template = 'df-input-text.html';
+                            scope.templateData.template = 'df-input-textarea.html';
                             break;
 
                         case 'custom':
@@ -2910,15 +2923,15 @@ angular.module('dfTable', [])
                             ]
                         }
                         break;
-                    
+
                     case 'reference':
 
                         /*if (scope.field.ref_table === scope.table && scope.field.value) {
-                            scope.templateData.template = 'df-input-ref-text.html';
-                            scope.templateData.editable = false;
-                            console.log(scope.currentEditRecord[scope.field])
-                            break;
-                        }*/
+                         scope.templateData.template = 'df-input-ref-text.html';
+                         scope.templateData.editable = false;
+                         console.log(scope.currentEditRecord[scope.field])
+                         break;
+                         }*/
 
                         var systemTablePrefix = 'df_sys_';
 
@@ -3311,7 +3324,8 @@ angular.module('dfTable', [])
             }
         }
 
-    }])
+    }
+    ])
     .filter('orderAndShowSchema', [function () {
 
         return function (items, fields, reverse) {
