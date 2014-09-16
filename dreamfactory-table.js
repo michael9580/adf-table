@@ -3421,8 +3421,8 @@ angular.module('dfTable', [])
 
                     filtered.sort(
                         function sortfn(a, b) {
-                            var upA = a[field].toUpperCase();
-                            var upB = b[field].toUpperCase();
+                            var upA = a[field] == null ? 1 : a[field].toUpperCase();
+                            var upB = b[field] == null ? 0 : b[field].toUpperCase();
                             return (
                                 upA < upB
                                 ) ? -1 : (
@@ -3435,13 +3435,9 @@ angular.module('dfTable', [])
                 default:
                     filtered.sort(
                         function sortfn(a, b) {
-                            var upA = a[field]
-                            var upB = b[field]
-                            return (
-                                upA < upB
-                                ) ? -1 : (
-                                upA > upB
-                                ) ? 1 : 0;
+                            var upA = a[field] == null ? 1 : a[field];
+                            var upB = b[field] == null ? 0 : b[field];
+                            return (upA < upB) ? -1 : (upA > upB) ? 1 : 0;
                         }
                     );
             }
